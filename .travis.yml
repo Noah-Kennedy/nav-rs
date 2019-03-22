@@ -51,4 +51,4 @@ addons:
       - gcc
       - binutils-dev
       - libiberty-dev
-  - ninja-build
+      - ninja-build
