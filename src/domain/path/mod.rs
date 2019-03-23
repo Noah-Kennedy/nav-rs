@@ -1,31 +1,25 @@
-pub struct PathNode {
-    x_coord: isize,
-    y_coord: isize,
-    next: Option<Box<PathNode>>
+pub struct ListNode<T> {
+    value: T,
+    next: Option<Box<ListNode<T>>>
 }
 
-impl PathNode {
-    pub fn route(x_coord: usize, y_coord: usize, next: PathNode) -> Self {
+impl<T> ListNode<T> {
+    pub fn new(value: T) -> Self {
         Self {
-            x_coord,
-            y_coord,
-            next: Some(Box::new(next))
-        }
-    }
-
-    pub fn destination(x_coord: isize, y_coord: isize) -> Self {
-        Self {
-            x_coord,
-            y_coord,
+            value,
             next: None,
         }
     }
 
-    pub fn follow(self) -> Option<Box<PathNode>> {
-        self.next
+    pub fn set_next(&mut self, next: ListNode<T>) {
+        self.next = Some(Box::new(next));
     }
 
-    pub fn get_x(&self) -> isize {
-        self.x_coord
+    pub fn get_next(&self) -> &Option<Box<ListNode<T>>> {
+        &self.next
+    }
+
+    pub fn get_value(&self) -> &T {
+        &self.value
     }
 }
