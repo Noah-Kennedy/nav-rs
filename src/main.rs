@@ -1,20 +1,33 @@
-use nalgebra::base::{Matrix, VecStorage, MatrixMN};
-use nalgebra::base::dimension::{Dynamic, DimName};
-use nalgebra::{Dim, DefaultAllocator};
-use nalgebra::base::allocator::Allocator;
+#[macro_use]
+extern crate ndarray;
 
-pub struct Grid<R, C> where R: Dim + DimName, C: Dim + DimName,
-                            DefaultAllocator: Allocator<f32, R, C> {
-    pub terminals: Matrix<bool, R, C, DefaultAllocator>,
-    pub values: MatrixMN<f32, R, C>,
-    pub mutables: Matrix<bool, R, C, DefaultAllocator>,
-    pub traversables: Matrix<bool, R, C, DefaultAllocator>,
+use ndarray::{Array, Dim};
+use std::cmp::Ordering::Equal;
+
+pub struct Grid {
+    pub values: Array<f32, Dim<[usize; 2]>>,
+    pub terminal: Array<bool, Dim<[usize; 2]>>,
+    pub mutable: Array<bool, Dim<[usize; 2]>>,
+    pub traversable: Array<bool, Dim<[usize; 2]>>,
 }
 
-impl<R, C> Grid<R, C> where R: Dim + DimName, C: Dim + DimName,
-                            DefaultAllocator: Allocator<f32, R, C> {
-    pub fn constrain(&self) -> MatrixMN<f32, R, C> {
-        unimplemented!()
+impl Grid {
+    pub fn constrain(&self, agent_width: usize, agent_height: usize) -> Array<f32, Dim<[usize; 2]>> {
+        let mut constrained = self.values.clone();
+
+        for ri in 0..constrained.rows() {
+            for ci in 0..constrained.cols() {
+                if self.mutable[[ci, ri]] {
+                    constrained[[ci, ri]] = *self.values
+                        .slice(s![ci-agent_width..ci+agent_width, ri-agent_height..ri+agent_height])
+                        .iter()
+                        .min_by(|a, b| a.partial_cmp(b).unwrap_or(Equal))
+                        .unwrap();
+                }
+            }
+        }
+
+        constrained
     }
 }
 
