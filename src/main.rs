@@ -1,34 +1,17 @@
 #[macro_use]
 extern crate ndarray;
 
-use ndarray::{Array, Dim};
-use std::cmp::Ordering::Equal;
+use crate::grid::Grid;
+use ndarray::Array2;
 
-pub struct Grid {
-    pub values: Array<f32, Dim<[usize; 2]>>,
-    pub terminal: Array<bool, Dim<[usize; 2]>>,
-    pub mutable: Array<bool, Dim<[usize; 2]>>,
-    pub traversable: Array<bool, Dim<[usize; 2]>>,
+pub mod grid;
+
+fn main() {
+    let mut grid = Grid::new(50, 25);
+
+    grid.add_obstruction(10, 5, -1.0);
+    grid.add_obstruction(30, 10, -1.0);
+    grid.add_obstruction(40, 20, -1.0);
+
+    grid.draw();
 }
-
-impl Grid {
-    pub fn constrain(&self, agent_width: usize, agent_height: usize) -> Array<f32, Dim<[usize; 2]>> {
-        let mut constrained = self.values.clone();
-
-        for ri in 0..constrained.rows() {
-            for ci in 0..constrained.cols() {
-                if self.mutable[[ci, ri]] {
-                    constrained[[ci, ri]] = *self.values
-                        .slice(s![ci-agent_width..ci+agent_width, ri-agent_height..ri+agent_height])
-                        .iter()
-                        .min_by(|a, b| a.partial_cmp(b).unwrap_or(Equal))
-                        .unwrap();
-                }
-            }
-        }
-
-        constrained
-    }
-}
-
-fn main() {}
